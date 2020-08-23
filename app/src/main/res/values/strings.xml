@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">VideoMeetingApp</string>
+    <string name="welcome_to">Welcome To</string>
+    <string name="sign_in_your_account">Sign in your account</string>
+    <string name="email">Email : </string>
+    <string name="abcd_gmail_com">abcd@gmail.com</string>
+    <string name="u2022_u2022_u2022_u2022_u2022_u2022_u2022_u2022">• • • • • • • •</string>
+    <string name="sign_in">Sign In</string>
+    <string name="don_t_have_a_account">Don\'t have a account ?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="fill_your_details">Fill your Details</string>
+    <string name="first_name">First Name :</string>
+    <string name="alic">Alic</string>
+    <string name="last_name">Last Name :</string>
+    <string name="deo">Deo</string>
+    <string name="already_have_an_account">Already have an account ?</string>
+</resources>
