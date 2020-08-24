@@ -24,7 +24,7 @@ public class PreferenceManager {
         editor.putString(key, value);
         editor.apply();
     }
-    public String getString(String keyFirstName, String key){
+    public String getString(String key){
         return sharedPreferences.getString(key,null);
     }
 
