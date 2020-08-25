@@ -10,22 +10,25 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.videomeetingapp.R;
+import com.example.videomeetingapp.listeners.UsersListener;
 import com.example.videomeetingapp.models.User;
 
 import java.util.List;
 
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder>{
+public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
     private List<User> users;
+    private UsersListener usersListener;
 
-    public UserAdapter(List<User> users) {
+    public UserAdapter(List<User> users, UsersListener usersListener) {
         this.users = users;
+        this.usersListener = usersListener;
     }
 
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new UserViewHolder(
-                LayoutInflater.from(parent.getContext()).inflate(R.layout.item_container_user,parent,false)
+                LayoutInflater.from(parent.getContext()).inflate(R.layout.item_container_user, parent, false)
         );
     }
 
@@ -39,21 +42,25 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         return users.size();
     }
 
-    static class UserViewHolder extends RecyclerView.ViewHolder{
-        TextView textFirstChar,textUserName,textEmail;
-        ImageView imageAudioMeeting,imageVideoMeeting;
+    class UserViewHolder extends RecyclerView.ViewHolder {
+        TextView textFirstChar, textUserName, textEmail;
+        ImageView imageAudioMeeting, imageVideoMeeting;
+
         UserViewHolder(@NonNull View itemView) {
             super(itemView);
-            textFirstChar=itemView.findViewById(R.id.textFirstChar);
-            textUserName=itemView.findViewById(R.id.textUserName);
-            textEmail=itemView.findViewById(R.id.textEmail);
-            imageAudioMeeting=itemView.findViewById(R.id.imageAudioMeeting);
-            imageVideoMeeting=itemView.findViewById(R.id.imageVideoMeeting);
+            textFirstChar = itemView.findViewById(R.id.textFirstChar);
+            textUserName = itemView.findViewById(R.id.textUserName);
+            textEmail = itemView.findViewById(R.id.textEmail);
+            imageAudioMeeting = itemView.findViewById(R.id.imageAudioMeeting);
+            imageVideoMeeting = itemView.findViewById(R.id.imageVideoMeeting);
         }
-        void setUserData(User user){
-            textFirstChar.setText(user.firstName.substring(0,1));
-            textUserName.setText(String.format("%s %s",user.firstName,user.lastName));
+
+        void setUserData(User user) {
+            textFirstChar.setText(user.firstName.substring(0, 1));
+            textUserName.setText(String.format("%s %s", user.firstName, user.lastName));
             textEmail.setText(user.email);
+            imageAudioMeeting.setOnClickListener(v -> usersListener.initiatedAudioMeeting(user));
+            imageVideoMeeting.setOnClickListener(v -> usersListener.initiatedVideoMeeting(user));
         }
     }
 }

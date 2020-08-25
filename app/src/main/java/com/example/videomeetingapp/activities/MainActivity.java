@@ -2,6 +2,7 @@ package com.example.videomeetingapp.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.widget.Toast;
 
 import com.example.videomeetingapp.R;
 import com.example.videomeetingapp.adapters.UserAdapter;
+import com.example.videomeetingapp.listeners.UsersListener;
 import com.example.videomeetingapp.models.User;
 import com.example.videomeetingapp.utilities.Constants;
 import com.example.videomeetingapp.utilities.PreferenceManager;
@@ -25,13 +27,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements UsersListener {
 
     private PreferenceManager preferenceManager;
     private List<User> users;
     private UserAdapter userAdapter;
     private TextView textErrorMessage;
-    private ProgressBar usersProgressBar;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +47,7 @@ public class MainActivity extends AppCompatActivity {
                 preferenceManager.getString(Constants.KEY_FIRST_NAME),
                 preferenceManager.getString(Constants.KEY_LAST_NAME)
         ));
-        findViewById(R.id.textSignOut).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signOut();
-            }
-        });
+        findViewById(R.id.textSignOut).setOnClickListener(v -> signOut());
         FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 sendFCMTokenToDatabase(task.getResult().getToken());
@@ -59,23 +56,25 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView usersRecyclerView = findViewById(R.id.usersRecyclerView);
         textErrorMessage = findViewById(R.id.textErrorMessage);
-        usersProgressBar = findViewById(R.id.usersProgressBar);
 
         users = new ArrayList<>();
-        userAdapter = new UserAdapter(users);
+        userAdapter = new UserAdapter(users,this);
         usersRecyclerView.setAdapter(userAdapter);
+        swipeRefreshLayout=findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(this::getUsers);
         getUsers();
     }
 
     private void getUsers() {
-        usersProgressBar.setVisibility(View.VISIBLE);
+        swipeRefreshLayout.setRefreshing(true);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection(Constants.KEY_COLLECTION_USERS)
                 .get()
                 .addOnCompleteListener(task -> {
-                    usersProgressBar.setVisibility(View.GONE);
+                    swipeRefreshLayout.setRefreshing(false);
                     String myUserId = preferenceManager.getString(Constants.KEY_USER_ID);
                     if (task.isSuccessful() && task.getResult() != null) {
+                        users.clear();
                         for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
                             if (myUserId.equals(documentSnapshot.getId())) {
                                 continue;
@@ -124,5 +123,23 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(getApplicationContext(), SigninActivity.class));
             finish();
         }).addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Unable to sign out", Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void initiatedVideoMeeting(User user) {
+        if(user.token==null || user.token.trim().isEmpty()){
+            Toast.makeText(MainActivity.this,user.firstName+" "+user.lastName+" not availble for meeting",Toast.LENGTH_SHORT).show();
+        }else {
+            Toast.makeText(MainActivity.this,"Video meeting with "+user.firstName+" "+user.lastName,Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void initiatedAudioMeeting(User user) {
+        if(user.token==null || user.token.trim().isEmpty()){
+            Toast.makeText(MainActivity.this,user.firstName+" "+user.lastName+" not availble for meeting",Toast.LENGTH_SHORT).show();
+        }else {
+            Toast.makeText(MainActivity.this,"Audio meeting with "+user.firstName+" "+user.lastName,Toast.LENGTH_SHORT).show();
+        }
     }
 }
