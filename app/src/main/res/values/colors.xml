@@ -9,4 +9,6 @@
     <color name="colorTextIcon">#FFFFFF</color>
     <color name="colorBackground">#FAFAFA</color>
     <color name="colorHintText">#BDBDBD</color>
+    <color name="colorMeetingStart">#D39239</color>
+    <color name="colorMeetingEnd">#FCF0E6E7</color>
 </resources>
