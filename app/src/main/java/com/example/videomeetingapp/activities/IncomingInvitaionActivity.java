@@ -32,15 +32,20 @@ import retrofit2.Response;
 
 public class IncomingInvitaionActivity extends AppCompatActivity {
 
+
+    private String meetingType = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incoming_invitaion);
         ImageView imageMeetingType = findViewById(R.id.iamgeMeetingType);
-        String meetingType = getIntent().getStringExtra(Constants.REMOTE_MSG_MEETING_TYPE);
+        meetingType = getIntent().getStringExtra(Constants.REMOTE_MSG_MEETING_TYPE);
         if (meetingType != null) {
             if (meetingType.equals("video")) {
                 imageMeetingType.setImageResource(R.drawable.ic_videocam);
+            } else {
+                imageMeetingType.setImageResource(R.drawable.ic_audio);
             }
         }
 
@@ -100,12 +105,15 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
                     if (type.equals(Constants.REMOTE_MSG_INVITATION_ACCEPT)) {
                         try {
                             URL serverURL = new URL("http://meet.jit.si");
-                            JitsiMeetConferenceOptions conferenceOptions =
-                                    new JitsiMeetConferenceOptions.Builder()
-                                            .setServerURL(serverURL)
-                                            .setWelcomePageEnabled(false)
-                                            .setRoom(getIntent().getStringExtra(Constants.REMOTE_MSG_MEETING_ROOM)).build();
-                            JitsiMeetActivity.launch(IncomingInvitaionActivity.this, conferenceOptions);
+
+                            JitsiMeetConferenceOptions.Builder builder = new JitsiMeetConferenceOptions.Builder();
+                            builder.setServerURL(serverURL);
+                            builder.setWelcomePageEnabled(false);
+                            builder.setRoom(getIntent().getStringExtra(Constants.REMOTE_MSG_MEETING_ROOM));
+                            if (meetingType.equals("audio")) {
+                                builder.setVideoMuted(true);
+                            }
+                            JitsiMeetActivity.launch(IncomingInvitaionActivity.this, builder.build());
                             finish();
                         } catch (Exception e) {
                             Toast.makeText(IncomingInvitaionActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
