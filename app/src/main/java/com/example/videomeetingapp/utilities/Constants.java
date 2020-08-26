@@ -24,6 +24,10 @@ public class Constants {
     public static final String REMOTE_MSG_REGISTRATION_IDS="registration_ids";
     public static final String REMOTE_MSG_MEETING_TYPE="meeting_type";
     public static final String REMOTE_MSG_INVITER_TOKEN="inviterToken";
+    public static final String REMOTE_MSG_INVITATION_RESPONSE="invitationResponse";
+    public static final String REMOTE_MSG_INVITATION_ACCEPT="accept";
+    public static final String REMOTE_MSG_INVITATION_REJECT="reject";
+    public static final String REMOTE_MSG_INVITATION_CANCELLED="cancelled";
 
 
     public static HashMap<String ,String > getRemoteMessageHeaders(){
