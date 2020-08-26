@@ -19,8 +19,12 @@ import com.example.videomeetingapp.network.ApiClient;
 import com.example.videomeetingapp.network.ApiService;
 import com.example.videomeetingapp.utilities.Constants;
 
+import org.jitsi.meet.sdk.JitsiMeetActivity;
+import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.net.URL;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,97 +36,112 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incoming_invitaion);
-        ImageView imageMeetingType=findViewById(R.id.iamgeMeetingType);
-        String meetingType=getIntent().getStringExtra(Constants.REMOTE_MSG_MEETING_TYPE);
-        if(meetingType!=null){
-            if(meetingType.equals("video")){
+        ImageView imageMeetingType = findViewById(R.id.iamgeMeetingType);
+        String meetingType = getIntent().getStringExtra(Constants.REMOTE_MSG_MEETING_TYPE);
+        if (meetingType != null) {
+            if (meetingType.equals("video")) {
                 imageMeetingType.setImageResource(R.drawable.ic_videocam);
             }
         }
 
-        TextView textFirstChar=findViewById(R.id.textFirstChar);
-        TextView textUsername=findViewById(R.id.textUserName);
-        TextView textEmail=findViewById(R.id.textEmail);
+        TextView textFirstChar = findViewById(R.id.textFirstChar);
+        TextView textUsername = findViewById(R.id.textUserName);
+        TextView textEmail = findViewById(R.id.textEmail);
 
-        String firstname=getIntent().getStringExtra(Constants.KEY_FIRST_NAME);
-        if(firstname!=null){
-            textFirstChar.setText(firstname.substring(0,1));
+        String firstname = getIntent().getStringExtra(Constants.KEY_FIRST_NAME);
+        if (firstname != null) {
+            textFirstChar.setText(firstname.substring(0, 1));
         }
 
-        textUsername.setText(String.format("%s %s",firstname,getIntent().getStringExtra(Constants.KEY_LAST_NAME)));
+        textUsername.setText(String.format("%s %s", firstname, getIntent().getStringExtra(Constants.KEY_LAST_NAME)));
         textEmail.setText(getIntent().getStringExtra(Constants.KEY_EMAIL));
 
-        ImageView imageAcceptInvitation=findViewById(R.id.imageAcceptInvitation);
+        ImageView imageAcceptInvitation = findViewById(R.id.imageAcceptInvitation);
 
         imageAcceptInvitation.setOnClickListener(v -> sendInvitationResponse(
                 Constants.REMOTE_MSG_INVITATION_ACCEPT,
                 getIntent().getStringExtra(Constants.REMOTE_MSG_INVITER_TOKEN)
         ));
 
-        ImageView imageRejectInvitation=findViewById(R.id.imageRejectInvitation);
+        ImageView imageRejectInvitation = findViewById(R.id.imageRejectInvitation);
         imageRejectInvitation.setOnClickListener(v -> sendInvitationResponse(
                 Constants.REMOTE_MSG_INVITATION_REJECT,
                 getIntent().getStringExtra(Constants.REMOTE_MSG_INVITER_TOKEN)
         ));
     }
 
-    private void sendInvitationResponse(String type,String receiverToken){
-        try{
-            JSONArray tokens=new JSONArray();
+    private void sendInvitationResponse(String type, String receiverToken) {
+        try {
+            JSONArray tokens = new JSONArray();
             tokens.put(receiverToken);
 
-            JSONObject body=new JSONObject();
-            JSONObject data=new JSONObject();
-            data.put(Constants.REMOTE_MSG_TYPE,Constants.REMOTE_MSG_INVITATION_RESPONSE);
-            data.put(Constants.REMOTE_MSG_INVITATION_RESPONSE,type);
+            JSONObject body = new JSONObject();
+            JSONObject data = new JSONObject();
+            data.put(Constants.REMOTE_MSG_TYPE, Constants.REMOTE_MSG_INVITATION_RESPONSE);
+            data.put(Constants.REMOTE_MSG_INVITATION_RESPONSE, type);
 
-            body.put(Constants.REMOTE_MSG_DATA,data);
-            body.put(Constants.REMOTE_MSG_REGISTRATION_IDS,tokens);
-            sendRemoteMessage(body.toString(),Constants.REMOTE_MSG_INVITATION);
+            body.put(Constants.REMOTE_MSG_DATA, data);
+            body.put(Constants.REMOTE_MSG_REGISTRATION_IDS, tokens);
+            sendRemoteMessage(body.toString(), Constants.REMOTE_MSG_INVITATION);
 
-        }catch (Exception e){
-            Toast.makeText(IncomingInvitaionActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(IncomingInvitaionActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             finish();
         }
     }
 
-    private void sendRemoteMessage(String remoteBodyMessage, String type){
+    private void sendRemoteMessage(String remoteBodyMessage, String type) {
         ApiClient.getClient().create(ApiService.class).sendRemoteMessage(
-                Constants.getRemoteMessageHeaders(),remoteBodyMessage
+                Constants.getRemoteMessageHeaders(), remoteBodyMessage
         ).enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if(response.isSuccessful()){
-                    if(type.equals(Constants.REMOTE_MSG_INVITATION_ACCEPT)){
-                        Toast.makeText(IncomingInvitaionActivity.this,"Invitation Accepted",Toast.LENGTH_SHORT).show();
-                    }else {
-                        Toast.makeText(IncomingInvitaionActivity.this,"Invitation Rejected",Toast.LENGTH_SHORT).show();
+                if (response.isSuccessful()) {
+                    if (type.equals(Constants.REMOTE_MSG_INVITATION_ACCEPT)) {
+                        try {
+                            URL serverURL = new URL("http://meet.jit.si");
+                            JitsiMeetConferenceOptions conferenceOptions =
+                                    new JitsiMeetConferenceOptions.Builder()
+                                            .setServerURL(serverURL)
+                                            .setWelcomePageEnabled(false)
+                                            .setRoom(getIntent().getStringExtra(Constants.REMOTE_MSG_MEETING_ROOM)).build();
+                            JitsiMeetActivity.launch(IncomingInvitaionActivity.this, conferenceOptions);
+                            finish();
+                        } catch (Exception e) {
+                            Toast.makeText(IncomingInvitaionActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(IncomingInvitaionActivity.this, "Invitation Rejected", Toast.LENGTH_SHORT).show();
+                        finish();
                     }
-                }else {
-                    Toast.makeText(IncomingInvitaionActivity.this,response.message(),Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(IncomingInvitaionActivity.this, response.message(), Toast.LENGTH_SHORT).show();
+                    finish();
                 }
-                finish();
+
             }
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                Toast.makeText(IncomingInvitaionActivity.this,t.getMessage(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(IncomingInvitaionActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
     }
-    private BroadcastReceiver invitationResponseReceiver=new BroadcastReceiver() {
+
+    private BroadcastReceiver invitationResponseReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String type=intent.getStringExtra(Constants.REMOTE_MSG_INVITATION_RESPONSE);
-            if(type!=null){
-                if (type.equals(Constants.REMOTE_MSG_INVITATION_CANCELLED)){
-                    Toast.makeText(context,"Invitation Cancelled",Toast.LENGTH_SHORT).show();
+            String type = intent.getStringExtra(Constants.REMOTE_MSG_INVITATION_RESPONSE);
+            if (type != null) {
+                if (type.equals(Constants.REMOTE_MSG_INVITATION_CANCELLED)) {
+                    Toast.makeText(context, "Invitation Cancelled", Toast.LENGTH_SHORT).show();
                     finish();
                 }
             }
         }
     };
+
     @Override
     protected void onStart() {
         super.onStart();
