@@ -1,16 +1,21 @@
 package com.example.videomeetingapp.activities;
 
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.videomeetingapp.R;
 import com.example.videomeetingapp.adapters.UserAdapter;
@@ -37,13 +42,15 @@ public class MainActivity extends AppCompatActivity implements UsersListener {
     private TextView textErrorMessage;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ImageView imageConference;
+    private int REQUEST_CODE_BATTERY_OPTIMIZATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         preferenceManager = new PreferenceManager(getApplicationContext());
-        imageConference=findViewById(R.id.imageConference);
+        imageConference = findViewById(R.id.imageConference);
 
         TextView textTitle = findViewById(R.id.textTitle);
         textTitle.setText(String.format(
@@ -62,11 +69,13 @@ public class MainActivity extends AppCompatActivity implements UsersListener {
         textErrorMessage = findViewById(R.id.textErrorMessage);
 
         users = new ArrayList<>();
-        userAdapter = new UserAdapter(users,this);
+        userAdapter = new UserAdapter(users, this);
         usersRecyclerView.setAdapter(userAdapter);
-        swipeRefreshLayout=findViewById(R.id.swipeRefreshLayout);
+
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(this::getUsers);
         getUsers();
+        checkbatteryOptimization();
     }
 
     private void getUsers() {
@@ -79,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements UsersListener {
                     String myUserId = preferenceManager.getString(Constants.KEY_USER_ID);
                     if (task.isSuccessful() && task.getResult() != null) {
                         users.clear();
+
                         for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
                             if (myUserId.equals(documentSnapshot.getId())) {
                                 continue;
@@ -88,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements UsersListener {
                             user.lastName = documentSnapshot.getString(Constants.KEY_LAST_NAME);
                             user.email = documentSnapshot.getString(Constants.KEY_EMAIL);
                             user.token = documentSnapshot.getString(Constants.KEY_FCM_TOKEN);
+
                             users.add(user);
                         }
                         if (users.size() > 0) {
@@ -109,7 +120,8 @@ public class MainActivity extends AppCompatActivity implements UsersListener {
                 preferenceManager.getString(Constants.KEY_USER_ID)
         );
         documentReference.update(Constants.KEY_FCM_TOKEN, token)
-                .addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Error : Token note Updated " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(MainActivity.this,
+                        "Error : Token note Updated " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void signOut() {
@@ -131,42 +143,69 @@ public class MainActivity extends AppCompatActivity implements UsersListener {
 
     @Override
     public void initiatedVideoMeeting(User user) {
-        if(user.token==null || user.token.trim().isEmpty()){
-            Toast.makeText(MainActivity.this,user.firstName+" "+user.lastName+" V not availble for meeting",Toast.LENGTH_SHORT).show();
-        }else {
-            Intent intent=new Intent(getApplicationContext(),OutgoingInvitaionActivity.class);
-            intent.putExtra("user",user);
-            intent.putExtra("type","video");
+        if (user.token == null || user.token.trim().isEmpty()) {
+            Toast.makeText(MainActivity.this,
+                    user.firstName + " " + user.lastName + " V not availble for meeting",
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            Intent intent = new Intent(getApplicationContext(), OutgoingInvitaionActivity.class);
+            intent.putExtra("user", user);
+            intent.putExtra("type", "video");
             startActivity(intent);
         }
     }
 
     @Override
     public void initiatedAudioMeeting(User user) {
-        if(user.token==null || user.token.trim().isEmpty()){
-            Toast.makeText(MainActivity.this,user.firstName+" "+user.lastName+" not availble for meeting",Toast.LENGTH_SHORT).show();
-        }else {
-            Intent intent=new Intent(getApplicationContext(),OutgoingInvitaionActivity.class);
-            intent.putExtra("user",user);
-            intent.putExtra("type","audio");
+        if (user.token == null || user.token.trim().isEmpty()) {
+            Toast.makeText(MainActivity.this, user.firstName + " " + user.lastName + " not availble for meeting", Toast.LENGTH_SHORT).show();
+        } else {
+            Intent intent = new Intent(getApplicationContext(), OutgoingInvitaionActivity.class);
+            intent.putExtra("user", user);
+            intent.putExtra("type", "audio");
             startActivity(intent);
         }
     }
 
     @Override
     public void onMultipleUsersAction(Boolean isMultipleUsersSelected) {
-        if(isMultipleUsersSelected){
+        if (isMultipleUsersSelected) {
             imageConference.setVisibility(View.VISIBLE);
             imageConference.setOnClickListener(v -> {
-                Intent intent=new Intent(getApplicationContext(),OutgoingInvitaionActivity.class);
-                intent.putExtra("selecteduser",new Gson().toJson(userAdapter.getSelectedUsers()));
-                intent.putExtra("type","video");
-                intent.putExtra("isMultiple",true);
+                Intent intent = new Intent(getApplicationContext(), OutgoingInvitaionActivity.class);
+                intent.putExtra("selecteduser", new Gson().toJson(userAdapter.getSelectedUsers()));
+                intent.putExtra("type", "video");
+                intent.putExtra("isMultiple", true);
                 startActivity(intent);
             });
-        }
-        else {
+        } else {
             imageConference.setVisibility(View.GONE);
+        }
+    }
+
+    private void checkbatteryOptimization() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            if (!powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Warning");
+                builder.setMessage("Battery optimization is enabled. It can interrupt running background services");
+                builder.setPositiveButton("Disable", (dialog, which) -> {
+                    Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                    startActivityForResult(intent, REQUEST_CODE_BATTERY_OPTIMIZATION);
+
+                });
+                builder.setNegativeButton("Cancle", (dialog, which) -> dialog.dismiss());
+                builder.create().show();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_BATTERY_OPTIMIZATION) {
+            checkbatteryOptimization();
         }
     }
 }

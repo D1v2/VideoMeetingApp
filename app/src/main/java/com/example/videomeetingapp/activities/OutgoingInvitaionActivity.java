@@ -44,9 +44,11 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
     private String inviterToken = null;
     private String meetingRoom = null;
     private String meetingType = null;
+
     private TextView textFirstChar;
     private TextView textUsername;
     private TextView textEmail;
+
     private int rejectionCount = 0;
     private int totalReceiver = 0;
 
@@ -59,6 +61,7 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
 
         ImageView imageMeetingType = findViewById(R.id.iamgeMeetingType);
         meetingType = getIntent().getStringExtra("type");
+
         if (meetingType != null) {
             if (meetingType.equals("video")) {
                 imageMeetingType.setImageResource(R.drawable.ic_videocam);
@@ -66,6 +69,7 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
                 imageMeetingType.setImageResource(R.drawable.ic_audio);
             }
         }
+
         textFirstChar = findViewById(R.id.textFirstChar);
         textUsername = findViewById(R.id.textUserName);
         textEmail = findViewById(R.id.textEmail);
@@ -76,6 +80,7 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
             textUsername.setText(String.format("%s %s", user.firstName, user.lastName));
             textEmail.setText(user.email);
         }
+
         ImageView imageStopInvitation = findViewById(R.id.imageStopInvitation);
         imageStopInvitation.setOnClickListener(v -> {
 
@@ -90,6 +95,7 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
                 }
             }
         });
+
         FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 inviterToken = task.getResult().getToken();
@@ -135,6 +141,7 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
 
             JSONObject body = new JSONObject();
             JSONObject data = new JSONObject();
+
             data.put(Constants.REMOTE_MSG_TYPE, Constants.REMOTE_MSG_INVITATION);
             data.put(Constants.REMOTE_MSG_MEETING_TYPE, meetingType);
             data.put(Constants.KEY_FIRST_NAME, preferenceManager.getString(Constants.KEY_FIRST_NAME));
@@ -148,6 +155,7 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
 
             body.put(Constants.REMOTE_MSG_DATA, data);
             body.put(Constants.REMOTE_MSG_REGISTRATION_IDS, tokens);
+
             sendRemoteMessage(body.toString(), Constants.REMOTE_MSG_INVITATION);
 
         } catch (Exception e) {
@@ -198,11 +206,13 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
 
             JSONObject body = new JSONObject();
             JSONObject data = new JSONObject();
+
             data.put(Constants.REMOTE_MSG_TYPE, Constants.REMOTE_MSG_INVITATION_RESPONSE);
             data.put(Constants.REMOTE_MSG_INVITATION_RESPONSE, Constants.REMOTE_MSG_INVITATION_CANCELLED);
 
             body.put(Constants.REMOTE_MSG_DATA, data);
             body.put(Constants.REMOTE_MSG_REGISTRATION_IDS, tokens);
+
             sendRemoteMessage(body.toString(), Constants.REMOTE_MSG_INVITATION_RESPONSE);
 
         } catch (Exception e) {
@@ -218,7 +228,7 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
             if (type != null) {
                 if (type.equals(Constants.REMOTE_MSG_INVITATION_ACCEPT)) {
                     try {
-                        URL serverURL = new URL("http://meet.jit.si");
+                        URL serverURL = new URL("https://meet.jit.si");
 
                         JitsiMeetConferenceOptions.Builder builder = new JitsiMeetConferenceOptions.Builder();
                         builder.setServerURL(serverURL);

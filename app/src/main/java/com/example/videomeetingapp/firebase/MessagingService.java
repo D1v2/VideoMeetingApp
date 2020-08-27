@@ -19,7 +19,9 @@ public class MessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
+
         String type=remoteMessage.getData().get(Constants.REMOTE_MSG_TYPE);
+
         if(type!=null){
             if(type.equals(Constants.REMOTE_MSG_INVITATION)){
                 Intent intent=new Intent(getApplicationContext(), IncomingInvitaionActivity.class);

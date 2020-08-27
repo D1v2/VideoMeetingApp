@@ -39,8 +39,10 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incoming_invitaion);
+
         ImageView imageMeetingType = findViewById(R.id.iamgeMeetingType);
         meetingType = getIntent().getStringExtra(Constants.REMOTE_MSG_MEETING_TYPE);
+
         if (meetingType != null) {
             if (meetingType.equals("video")) {
                 imageMeetingType.setImageResource(R.drawable.ic_videocam);
@@ -58,7 +60,8 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
             textFirstChar.setText(firstname.substring(0, 1));
         }
 
-        textUsername.setText(String.format("%s %s", firstname, getIntent().getStringExtra(Constants.KEY_LAST_NAME)));
+        textUsername.setText(String.format("%s %s", firstname,
+                getIntent().getStringExtra(Constants.KEY_LAST_NAME)));
         textEmail.setText(getIntent().getStringExtra(Constants.KEY_EMAIL));
 
         ImageView imageAcceptInvitation = findViewById(R.id.imageAcceptInvitation);
@@ -82,6 +85,7 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
 
             JSONObject body = new JSONObject();
             JSONObject data = new JSONObject();
+
             data.put(Constants.REMOTE_MSG_TYPE, Constants.REMOTE_MSG_INVITATION_RESPONSE);
             data.put(Constants.REMOTE_MSG_INVITATION_RESPONSE, type);
 
@@ -90,7 +94,7 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
             sendRemoteMessage(body.toString(), Constants.REMOTE_MSG_INVITATION);
 
         } catch (Exception e) {
-            Toast.makeText(IncomingInvitaionActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -104,12 +108,13 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     if (type.equals(Constants.REMOTE_MSG_INVITATION_ACCEPT)) {
                         try {
-                            URL serverURL = new URL("http://meet.jit.si");
+                            URL serverURL = new URL("https://meet.jit.si");
 
                             JitsiMeetConferenceOptions.Builder builder = new JitsiMeetConferenceOptions.Builder();
                             builder.setServerURL(serverURL);
                             builder.setWelcomePageEnabled(false);
                             builder.setRoom(getIntent().getStringExtra(Constants.REMOTE_MSG_MEETING_ROOM));
+
                             if (meetingType.equals("audio")) {
                                 builder.setVideoMuted(true);
                             }
