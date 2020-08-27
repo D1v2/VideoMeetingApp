@@ -6,4 +6,5 @@ public interface UsersListener {
     void initiatedVideoMeeting(User user);
 
     void initiatedAudioMeeting(User user);
+    void onMultipleUsersAction(Boolean isMultipleUsersSelected);
 }

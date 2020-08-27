@@ -7,7 +7,9 @@
     android:paddingEnd="@dimen/_5sdp">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:id="@+id/userContainer"
+        android:animateLayoutChanges="true">
         <TextView
             android:layout_width="@dimen/_35sdp"
             android:layout_height="@dimen/_35sdp"
@@ -23,6 +25,22 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/viewDivider"
             />
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:id="@+id/imageSelected"
+            android:contentDescription="@string/app_name"
+            android:padding="@dimen/_3sdp"
+            android:src="@drawable/ic_accept"
+            android:tint="@color/colorTextIcon"
+            android:background="@drawable/background_user_icon"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/textFirstChar"
+            app:layout_constraintStart_toStartOf="@id/textFirstChar"
+            app:layout_constraintTop_toTopOf="@id/textFirstChar"
+            app:layout_constraintEnd_toEndOf="@id/textFirstChar"
+            />
+
 
         <View
             android:layout_width="1dp"
