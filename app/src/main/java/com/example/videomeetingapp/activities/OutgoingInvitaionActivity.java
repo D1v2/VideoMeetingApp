@@ -59,7 +59,7 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
 
         preferenceManager = new PreferenceManager(getApplicationContext());
 
-        ImageView imageMeetingType = findViewById(R.id.iamgeMeetingType);
+        ImageView imageMeetingType = findViewById(R.id.imageMeetingType);
         meetingType = getIntent().getStringExtra("type");
 
         if (meetingType != null) {
@@ -125,6 +125,16 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
         try {
             JSONArray tokens = new JSONArray();
 
+            JSONObject body = new JSONObject();
+            JSONObject data = new JSONObject();
+
+            data.put(Constants.REMOTE_MSG_TYPE, Constants.REMOTE_MSG_INVITATION);
+            data.put(Constants.REMOTE_MSG_MEETING_TYPE, meetingType);
+            data.put(Constants.KEY_FIRST_NAME, preferenceManager.getString(Constants.KEY_FIRST_NAME));
+            data.put(Constants.KEY_LAST_NAME, preferenceManager.getString(Constants.KEY_LAST_NAME));
+            data.put(Constants.KEY_EMAIL, preferenceManager.getString(Constants.KEY_EMAIL));
+            data.put(Constants.REMOTE_MSG_INVITER_TOKEN, inviterToken);
+
             if (receiverToken != null) {
                 tokens.put(receiverToken);
             }
@@ -139,22 +149,13 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
                 textUsername.setText(userNames.toString());
             }
 
-            JSONObject body = new JSONObject();
-            JSONObject data = new JSONObject();
-
-            data.put(Constants.REMOTE_MSG_TYPE, Constants.REMOTE_MSG_INVITATION);
-            data.put(Constants.REMOTE_MSG_MEETING_TYPE, meetingType);
-            data.put(Constants.KEY_FIRST_NAME, preferenceManager.getString(Constants.KEY_FIRST_NAME));
-            data.put(Constants.KEY_LAST_NAME, preferenceManager.getString(Constants.KEY_LAST_NAME));
-            data.put(Constants.KEY_EMAIL, preferenceManager.getString(Constants.KEY_EMAIL));
-            data.put(Constants.REMOTE_MSG_INVITER_TOKEN, inviterToken);
-
             meetingRoom = preferenceManager.getString(Constants.KEY_USER_ID) + "_" +
                     UUID.randomUUID().toString().substring(0, 5);
-            data.put(Constants.REMOTE_MSG_MEETING_ROOM, meetingRoom);
 
             body.put(Constants.REMOTE_MSG_DATA, data);
             body.put(Constants.REMOTE_MSG_REGISTRATION_IDS, tokens);
+            data.put(Constants.REMOTE_MSG_MEETING_ROOM, meetingRoom);
+
 
             sendRemoteMessage(body.toString(), Constants.REMOTE_MSG_INVITATION);
 
@@ -172,7 +173,7 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.isSuccessful()) {
                     if (type.equals(Constants.REMOTE_MSG_INVITATION)) {
-                        Toast.makeText(OutgoingInvitaionActivity.this, "Invitation set sucessFully", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(OutgoingInvitaionActivity.this, "Invitation set SucessFully", Toast.LENGTH_SHORT).show();
                     } else if (type.equals(Constants.REMOTE_MSG_INVITATION_RESPONSE)) {
                         Toast.makeText(OutgoingInvitaionActivity.this, "Invitation Cancelled", Toast.LENGTH_SHORT).show();
                         finish();
@@ -226,7 +227,7 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             String type = intent.getStringExtra(Constants.REMOTE_MSG_INVITATION_RESPONSE);
             if (type != null) {
-                if (type.equals(Constants.REMOTE_MSG_INVITATION_ACCEPT)) {
+                if (type.equals(Constants.REMOTE_MSG_INVITATION_ACCEPTED)) {
                     try {
                         URL serverURL = new URL("https://meet.jit.si");
 
@@ -243,7 +244,7 @@ public class OutgoingInvitaionActivity extends AppCompatActivity {
                     } catch (Exception e) {
                         Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                } else if (type.equals(Constants.REMOTE_MSG_INVITATION_REJECT)) {
+                } else if (type.equals(Constants.REMOTE_MSG_INVITATION_REJECTED)) {
                     rejectionCount += 1;
                     if (rejectionCount == totalReceiver) {
                         Toast.makeText(context, "Invitation Rejected", Toast.LENGTH_SHORT).show();

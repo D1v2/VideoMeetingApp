@@ -10,7 +10,7 @@
     <ImageView
         android:layout_width="@dimen/_30sdp"
         android:layout_height="@dimen/_30sdp"
-        android:id="@+id/iamgeMeetingType"
+        android:id="@+id/imageMeetingType"
         android:layout_marginTop="@dimen/_50sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -29,7 +29,7 @@
         android:text="@string/incoming_meeting_meassage"
         android:textColor="@color/colorTextIcon"
         android:textSize="@dimen/_15ssp"
-        app:layout_constraintTop_toBottomOf="@id/iamgeMeetingType"
+        app:layout_constraintTop_toBottomOf="@id/imageMeetingType"
         />
     <LinearLayout
         android:layout_width="match_parent"

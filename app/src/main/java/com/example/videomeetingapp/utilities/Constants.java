@@ -22,11 +22,12 @@ public class Constants {
     public static final String REMOTE_MSG_INVITATION="invitation";
     public static final String REMOTE_MSG_DATA="data";
     public static final String REMOTE_MSG_REGISTRATION_IDS="registration_ids";
-    public static final String REMOTE_MSG_MEETING_TYPE="meeting_type";
+    public static final String REMOTE_MSG_MEETING_TYPE="meetingtype";
     public static final String REMOTE_MSG_INVITER_TOKEN="inviterToken";
+
     public static final String REMOTE_MSG_INVITATION_RESPONSE="invitationResponse";
-    public static final String REMOTE_MSG_INVITATION_ACCEPT="accept";
-    public static final String REMOTE_MSG_INVITATION_REJECT="reject";
+    public static final String REMOTE_MSG_INVITATION_ACCEPTED="accept";
+    public static final String REMOTE_MSG_INVITATION_REJECTED="reject";
     public static final String REMOTE_MSG_INVITATION_CANCELLED="cancelled";
     public static final String REMOTE_MSG_MEETING_ROOM="meetingRoom";
 

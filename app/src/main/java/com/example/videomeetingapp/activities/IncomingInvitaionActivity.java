@@ -40,7 +40,7 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incoming_invitaion);
 
-        ImageView imageMeetingType = findViewById(R.id.iamgeMeetingType);
+        ImageView imageMeetingType = findViewById(R.id.imageMeetingType);
         meetingType = getIntent().getStringExtra(Constants.REMOTE_MSG_MEETING_TYPE);
 
         if (meetingType != null) {
@@ -65,15 +65,14 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
         textEmail.setText(getIntent().getStringExtra(Constants.KEY_EMAIL));
 
         ImageView imageAcceptInvitation = findViewById(R.id.imageAcceptInvitation);
-
         imageAcceptInvitation.setOnClickListener(v -> sendInvitationResponse(
-                Constants.REMOTE_MSG_INVITATION_ACCEPT,
+                Constants.REMOTE_MSG_INVITATION_ACCEPTED,
                 getIntent().getStringExtra(Constants.REMOTE_MSG_INVITER_TOKEN)
         ));
 
         ImageView imageRejectInvitation = findViewById(R.id.imageRejectInvitation);
         imageRejectInvitation.setOnClickListener(v -> sendInvitationResponse(
-                Constants.REMOTE_MSG_INVITATION_REJECT,
+                Constants.REMOTE_MSG_INVITATION_REJECTED,
                 getIntent().getStringExtra(Constants.REMOTE_MSG_INVITER_TOKEN)
         ));
     }
@@ -91,7 +90,7 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
 
             body.put(Constants.REMOTE_MSG_DATA, data);
             body.put(Constants.REMOTE_MSG_REGISTRATION_IDS, tokens);
-            sendRemoteMessage(body.toString(), Constants.REMOTE_MSG_INVITATION);
+            sendRemoteMessage(body.toString(), type);
 
         } catch (Exception e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -106,8 +105,10 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.isSuccessful()) {
-                    if (type.equals(Constants.REMOTE_MSG_INVITATION_ACCEPT)) {
+                    if (type.equals(Constants.REMOTE_MSG_INVITATION_ACCEPTED)) {
                         try {
+
+                            Toast.makeText(getApplicationContext(),"Invitaion accepted",Toast.LENGTH_SHORT).show();
                             URL serverURL = new URL("https://meet.jit.si");
 
                             JitsiMeetConferenceOptions.Builder builder = new JitsiMeetConferenceOptions.Builder();
@@ -125,13 +126,12 @@ public class IncomingInvitaionActivity extends AppCompatActivity {
                         }
                     } else {
                         Toast.makeText(IncomingInvitaionActivity.this, "Invitation Rejected", Toast.LENGTH_SHORT).show();
-                        finish();
+                       finish();
                     }
                 } else {
                     Toast.makeText(IncomingInvitaionActivity.this, response.message(), Toast.LENGTH_SHORT).show();
                     finish();
                 }
-
             }
 
             @Override

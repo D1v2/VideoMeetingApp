@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements UsersListener {
     public void initiatedVideoMeeting(User user) {
         if (user.token == null || user.token.trim().isEmpty()) {
             Toast.makeText(MainActivity.this,
-                    user.firstName + " " + user.lastName + " V not availble for meeting",
+                    user.firstName + " " + user.lastName + "  not availble for Video meeting",
                     Toast.LENGTH_SHORT).show();
         } else {
             Intent intent = new Intent(getApplicationContext(), OutgoingInvitaionActivity.class);
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements UsersListener {
     @Override
     public void initiatedAudioMeeting(User user) {
         if (user.token == null || user.token.trim().isEmpty()) {
-            Toast.makeText(MainActivity.this, user.firstName + " " + user.lastName + " not availble for meeting", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, user.firstName + " " + user.lastName + " not availble for Audio meeting", Toast.LENGTH_SHORT).show();
         } else {
             Intent intent = new Intent(getApplicationContext(), OutgoingInvitaionActivity.class);
             intent.putExtra("user", user);
